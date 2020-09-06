@@ -1,0 +1,50 @@
+---
+title: "Extra Credit on Migration"
+author: "Karl Satinitigan"
+date: "12/4/2019"
+output: html_document
+---
+
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(foreign)
+library(jtools)
+
+
+setwd("~/Documents/UChicago/Data Analysis/Problem Sets/Advanced Exercise - Migration")
+
+refugee_flows <- read_csv("refugee_flows.csv")
+
+
+refugee_flows <- na.omit(refugee_flows)
+
+view(refugee_flows)
+
+# 1 - linear regression of arrivals on riots
+regriots <- lm(ln_arrival_total ~ ln_riots_prevweek, data=refugee_flows)
+summ(regriots)
+
+# 2 - linear regression of arrivals on wave height
+regwaveht <- lm(ln_arrival_total ~ ln_wave_height_prevweek, data=refugee_flows)
+summ(regwaveht)
+
+# 3 - regression of arrivals on riots and wave height
+regwaveht_riots <- lm(ln_arrival_total ~ ln_riots_prevweek + ln_wave_height_prevweek, data=refugee_flows)
+summ(regwaveht_riots)
+
+# 4 - regression per month
+regwaveht_riots_monthly <- lm(ln_arrival_total ~ ln_wave_height_prevweek + ln_riots_prevweek + factor(month)-1, data=refugee_flows)
+summ(regwaveht_riots_monthly)
+
+# 5 - time series for death rate over time 
+ggplot(data = refugee_flows, mapping = aes(x=edate, y = deathrate)) +
+geom_smooth(method="loess", formula = y~x, size=.8, se=FALSE, span=0.02, color = "red") + scale_x_continuous(labs(title = "Daily death rate over time", x = "Time", y = "Daily Death Rate") + theme_bw()
+
+# 6 - time series for average wave conditions over time 
+ggplot(data = refugee_flows, mapping = aes(x=edate, y = wave_height_prevweek)) +
+    geom_line(color="blue") + labs(title = "Wave height over time", x = "Time", y = "Wave Height") + theme_bw()     
+
+# 7 - time series for both plots
+ggplot() + geom_smooth(data = refugee_flows, mapping = aes(x=edate, y = deathrate), method="loess", formula = y~x, size=0.8, se=FALSE, span=0.02, color = "red") + geom_line(data = refugee_flows, mapping = aes(x = edate, y = wave_height_prevweek/2.5), color = "blue") + scale_y_continuous(sec.axis = sec_axis(~.*2.5, name = "Wave Height")) + scale_x_continuous(breaks=seq(2006, 2018, 1)) + labs(title = "Wave height and death rate over time", x = "Time", y = "Daily Death Rate") + theme_bw() 
+

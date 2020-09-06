@@ -1,0 +1,50 @@
+---
+title: "Research Brief on Afghanistan Insurgents"
+author: "Karl Satinitigan"
+date: "12/4/2019"
+output: html_document
+---
+
+library(tidyverse)
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+library(scales)
+library(tidyr)
+library(foreign)
+library(jtools)
+
+setwd("~/Documents/UChicago/Data Analysis/Problem Sets/Research Brief - Insurgents")
+
+bomb_events <- read_csv("WRIGHT_weekly-ts.csv")
+
+# Time series for IED Events through time 
+ggplot(data = bomb_events, mapping = aes(x = week_of_conflict, y = IED_events)) + geom_line() + labs(title = "IED Events through time", x = "Week", y = "Number of IED Events") + theme_bw()
+    
+# Time series for IED Events through time with breakdown
+ggplot() + geom_line(data = bomb_events, mapping = aes(x = week_of_conflict, y = IED_events), color = "orange") + geom_line(data = bomb_events, mapping = aes(x = week_of_conflict, y = IED_FC), color = "green") + geom_line(data = bomb_events, mapping = aes(x = week_of_conflict, y = IED_Explosion), color = "blue") + labs(title = "IED Events through time",x = "Week", y = "Number of IED Events") + theme_bw()
+
+# Time series for IED Events through time separated by year    
+ggplot(data = bomb_events, mapping = aes(x = week, y = IED_events)) + geom_line() +
+facet_wrap(vars(year)) + labs(title = "IED Events through time", x = "Week", y = "Number of IED Events") + theme_bw()
+
+# New variable clear_rate
+bomb_events$clear_rate=bomb_events$IED_FC/(bomb_events$IED_FC+bomb_events$IED_Explosion)	
+view(bomb_events)
+
+# Linear regression for clear_rate
+regressclear_rate <- lm(clear_rate ~ week_of_conflict, data=bomb_events)
+summ(regressclear_rate)
+summary(regressclear_rate)
+
+# Time series for clear rate through time
+ggplot(data = bomb_events, mapping = aes(x = week_of_conflict, y = clear_rate)) + geom_line() + labs(title = "Clear Rate through Time", x = "Week", y = "Clear Rate") + theme_bw()
+
+# Time series for clear rate through time by year    
+ggplot(data = bomb_events, mapping = aes(x = week, y = clear_rate)) + geom_line() +
+facet_wrap(vars(year)) + labs(title = "Clear Rate through Time", x = "Week", y = "Clear Rate") + theme_bw()
+
+# Time series for clear rate with polynomial function
+ggplot(bomb_events, aes(x=week_of_conflict, y=clear_rate)) + geom_smooth(method=loess) + labs(title = "Clear Rate through Time", x = "Week", y = "Clear Rate") + theme_bw()
+
+ 
